@@ -1,0 +1,135 @@
+---
+title: "DATA607_Final_Project"
+author: "Wilson Ng"
+date: "2022-11-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(mongolite)
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(keyring)
+```
+
+## 1.Connecting to MongoDB to access Dr.Semmelweis's data on childbirth deaths.
+
+```{r}
+# making rstudio ask me for the password since I don't want to expose my pw when I upload this file to GitHub.
+
+mongo_server <- 'mongodb+srv://'
+username <- 'wilsonnrdb:'
+password <- .rs.askForPassword("Database Password:")
+cluster <- '@cluster0.cyjo0wo.mongodb.net/'
+
+connection_string = paste(mongo_server, username, password, cluster, sep = '')
+
+# Two collections - one has yearly data and the other one has monthly data.
+yearly_collection = mongo(collection='yearly', db='DATA607', url=connection_string)
+monthly_collection = mongo(collection= 'monthly', db='DATA607', url=connection_string)
+```
+
+## 2.Examining the yearly data
+
+```{r}
+yearly_query = yearly_collection$find()
+
+yearly_query
+```
+## 3.Examining the monthly data
+
+```{r}
+monthly_query = monthly_collection$find()
+
+monthly_query
+```
+## 4.Calculating the porportion of deaths out of the number of women giving birth.
+
+The table above shows the number of women giving birth at the two clinics at the Vienna General Hospital for the years 1841 to 1846.  
+
+```{r}
+# Adding a new column to yearly with proportion of deaths per no. births
+yearly_query <- yearly_query %>% mutate(proportion_deaths = deaths / births)
+
+# Converting Year column's data type to double.
+yearly_query$year <- as.numeric(yearly_query$year)
+
+# Print out yearly
+yearly_query
+```
+## 5. Plotting the proportion of deaths at both clinic 1 and clinic 2.
+
+```{r}
+# Setting the size of plots in this notebook
+options(repr.plot.width=7, repr.plot.height=4)
+
+# Plot yearly proportion of deaths at the two clinics
+ggplot(yearly_query, aes(year, proportion_deaths, color = clinic)) +
+    geom_line()
+```
+## 6. Examining the monthly data from Clinic 1.
+
+```{r}
+# Adding a new column with proportion of deaths per no. births
+monthly_query <- monthly_query %>% mutate(
+    proportion_deaths = deaths / births
+    )
+
+# Converting Date column's chr data type into date data type
+monthly_query$date <- ymd(monthly_query$date)
+
+# Print out the first rows in monthly
+head(monthly_query)
+```
+```{r}
+# Plot monthly proportion of deaths to see if there's any obvious decline in deaths.
+ggplot(monthly_query, aes(date, proportion_deaths)) +
+    geom_line() +
+    labs(x = "Date", y = "Proportion of Deaths", title = "Monthly Proportion of Deaths")
+```
+## 7. The effect of handwashing highlighted
+
+Dr.Semmelweis made handwashing obligatory in the summer of 1847.
+The effect of handwashing is made even more clear if we highlight this in the graph.
+
+```{r}
+# From this date handwashing was made mandatory
+handwashing_start = as.Date('1847-06-01')
+
+# Add a TRUE/FALSE column to monthly called handwashing_started
+monthly_query <- monthly_query %>% mutate(
+    handwashing_started = date >= handwashing_start
+    )
+
+# Plot monthly proportion of deaths before and after handwashing
+ggplot(monthly_query, aes(date, proportion_deaths, color = handwashing_started)) +
+    geom_line() +
+    labs(x = "Date", y = "Proportion of Deaths", title = "Monthly Proportion of Deaths")
+```
+## 8.How much did it reduce the monthly proportion of deaths on average?
+
+It reduced the proportion of deaths by around 8 percentage points.
+
+```{r}
+# Calculating the mean proportion of deaths 
+# before and after handwashing.
+
+monthly_summary <- monthly_query %>% 
+    group_by(handwashing_started) %>%
+    summarise(mean_proportion_deaths = mean(proportion_deaths))
+
+# Printing out the summary.
+monthly_summary
+```
+## A statistical analysis of Semmelweis handwashing data
+
+Proportion of deaths increased by between 6.7 and 10 percentage points when doctors didn't wash their hands, according to a 95% confidence interval.
+
+```{r}
+# Calculating a 95% Confidence intrerval using t.test 
+test_result <- t.test( proportion_deaths ~ handwashing_started, data = monthly_query)
+test_result
+```
+
