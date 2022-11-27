@@ -7,6 +7,6 @@ Data:
 
  Dr. Ignaz Semmelweis study: https://graphics8.nytimes.com/images/blogs/freakonomics/pdf/the%20etiology,%20concept%20and%20prophylaxis%20of%20childbed%20fever.pdf
 
-Maternal Mortality rates: https://www.statista.com/statistics/1240400/maternal-mortality-rates-worldwide-by-country/
+Infant Mortality rates: https://data.worldbank.org/indicator/SP.DYN.IMRT.IN
 
 UNICEF Data: https://data.unicef.org/topic/water-and-sanitation/hygiene/
