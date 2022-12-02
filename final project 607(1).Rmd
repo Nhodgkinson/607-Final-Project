@@ -16,16 +16,11 @@ library(ggplot2)
 
 urlfile="https://raw.githubusercontent.com/Nhodgkinson/607-Final-Project/main/JMP-WASH-in-health-care-facilities-2022-data-by-country(2).csv"
 
-unicef_df_all<-read_csv(url(urlfile))
-unicef_df_all$...3 <- str_replace_all(unicef_df_all$...3 , " ", "")
-
-
 hos_unicef_df<-unicef_df_all[,c(1:4,20:24)]
 names(hos_unicef_df) <- hos_unicef_df[1,]
 hos_unicef_df<-hos_unicef_df[-1,]
 hos_unicef_df$`Population(thousands)`<-as.numeric(hos_unicef_df$`Population(thousands)`)
 hos_unicef_df$`Population(thousands)`<-hos_unicef_df$`Population(thousands)`*(1000)
-
 
 ```
 
@@ -46,32 +41,33 @@ infant_mortality_df<-infant_mortality_df %>%
 ```
 
 ```{r}
+
+#Increase in handwashing facilities
 increase_hw_df<-hos_unicef_df %>%
   subset(Year > 1999 & Year < 2006)%>%
-  filter(`COUNTRY, AREA OR TERRITORY` == "Namibia"|`COUNTRY, AREA OR TERRITORY` == "Ghana"|`COUNTRY, AREA OR TERRITORY` == "Rwanda"|`COUNTRY, AREA OR TERRITORY` == "Saint Kitts and Nevis"|`COUNTRY, AREA OR TERRITORY` == "Trinidad and Tobago")
+  filter(`COUNTRY, AREA OR TERRITORY` == "Namibia"|`COUNTRY, AREA OR TERRITORY` == "Ghana"|`COUNTRY, AREA OR TERRITORY` == "Rwanda"|`COUNTRY, AREA OR TERRITORY` == "Trinidad and Tobago")
 
-increase_hw_df<-increase_hw_df[,c(1:3,8)]
+increase_hw_df<-increase_hw_df[,c(1,2,8)]
 
 ```
 
 ```{r}
-#pick out 5 countries that had an increase in hand washing over 5 years and 5 countries that saw no change and all countries that saw a decrease
-
+#Decrease in handwashing facilities
 decrease_hw_df<-hos_unicef_df %>%
   subset(Year > 1999 & Year < 2006)%>%
   filter(`COUNTRY, AREA OR TERRITORY` == "Zambia"|`COUNTRY, AREA OR TERRITORY` == "Kenya")
 
-decrease_hw_df<-decrease_hw_df[,c(1:3,8)]
+decrease_hw_df<-decrease_hw_df[,c(1,2,8)]
 
 ```
 
 ```{r}
-
+#no change in number of handwashing facilities
 same_hw_df<-hos_unicef_df %>%
   subset(Year > 1999 & Year < 2006)%>%
-  filter(`COUNTRY, AREA OR TERRITORY` == "Kiribati"|`COUNTRY, AREA OR TERRITORY` == "Lithuania"|`COUNTRY, AREA OR TERRITORY` == "Myanmar"|`COUNTRY, AREA OR TERRITORY` == "Mauritania"|`COUNTRY, AREA OR TERRITORY` == "Egypt")
+  filter(`COUNTRY, AREA OR TERRITORY` == "Kiribati"|`COUNTRY, AREA OR TERRITORY` == "Lithuania"|`COUNTRY, AREA OR TERRITORY` == "Myanmar"|`COUNTRY, AREA OR TERRITORY` == "Mauritania")
 
-same_hw_df<-same_hw_df[,c(1:3,8)]
+same_hw_df<-same_hw_df[,c(1,2,8)]
 
 ```
 
@@ -87,5 +83,11 @@ decrease_merge_df<-merge(x=decrease_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRU
 increase_merge_new<-increase_merge_df[increase_merge_df$Year.x == increase_merge_df$Year.y,]
 decrease_merge_new<-decrease_merge_df[decrease_merge_df$Year.x == decrease_merge_df$Year.y,]
 same_merge_new<-same_merge_df[same_merge_df$Year.x == same_merge_df$Year.y,]
+```
+
+```{r}
+same_merge_new<-same_merge_new[,-c(4)]
+decrease_merge_new<-decrease_merge_new[,-c(4)]
+increase_merge_new<-increase_merge_new[,-c(4)]
 ```
 
