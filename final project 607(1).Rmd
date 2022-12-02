@@ -45,7 +45,7 @@ infant_mortality_df<-infant_mortality_df %>%
 #Increase in handwashing facilities
 increase_hw_df<-hos_unicef_df %>%
   subset(Year > 1999 & Year < 2006)%>%
-  filter(`COUNTRY, AREA OR TERRITORY` == "Namibia"|`COUNTRY, AREA OR TERRITORY` == "Ghana"|`COUNTRY, AREA OR TERRITORY` == "Rwanda"|`COUNTRY, AREA OR TERRITORY` == "Trinidad and Tobago")
+  filter(`COUNTRY, AREA OR TERRITORY` == "Namibia"|`COUNTRY, AREA OR TERRITORY` == "Ghana"|`COUNTRY, AREA OR TERRITORY` == "Rwanda")
 
 increase_hw_df<-increase_hw_df[,c(1,2,8)]
 
@@ -65,7 +65,7 @@ decrease_hw_df<-decrease_hw_df[,c(1,2,8)]
 #no change in number of handwashing facilities
 same_hw_df<-hos_unicef_df %>%
   subset(Year > 1999 & Year < 2006)%>%
-  filter(`COUNTRY, AREA OR TERRITORY` == "Kiribati"|`COUNTRY, AREA OR TERRITORY` == "Lithuania"|`COUNTRY, AREA OR TERRITORY` == "Myanmar"|`COUNTRY, AREA OR TERRITORY` == "Mauritania")
+  filter(`COUNTRY, AREA OR TERRITORY` == "Lithuania"|`COUNTRY, AREA OR TERRITORY` == "Myanmar"|`COUNTRY, AREA OR TERRITORY` == "Mauritania")
 
 same_hw_df<-same_hw_df[,c(1,2,8)]
 
