@@ -16,6 +16,9 @@ library(ggplot2)
 
 urlfile="https://raw.githubusercontent.com/Nhodgkinson/607-Final-Project/main/JMP-WASH-in-health-care-facilities-2022-data-by-country(2).csv"
 
+unicef_df_all<-read_csv(url(urlfile))
+unicef_df_all$...3 <- str_replace_all(unicef_df_all$...3 , " ", "")
+
 hos_unicef_df<-unicef_df_all[,c(1:4,20:24)]
 names(hos_unicef_df) <- hos_unicef_df[1,]
 hos_unicef_df<-hos_unicef_df[-1,]
