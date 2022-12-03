@@ -1,0 +1,96 @@
+---
+title: "Final Project Data Clean of csv files"
+author: "Neil Hodgkinson, Wilson Ng"
+date: "2022-11-25"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyr)
+library(dplyr)
+library(readr)
+library(stringr)
+library(ggplot2)
+
+urlfile="https://raw.githubusercontent.com/Nhodgkinson/607-Final-Project/main/JMP-WASH-in-health-care-facilities-2022-data-by-country(2).csv"
+
+unicef_df_all<-read_csv(url(urlfile))
+unicef_df_all$...3 <- str_replace_all(unicef_df_all$...3 , " ", "")
+
+hos_unicef_df<-unicef_df_all[,c(1:4,20:24)]
+names(hos_unicef_df) <- hos_unicef_df[1,]
+hos_unicef_df<-hos_unicef_df[-1,]
+hos_unicef_df$`Population(thousands)`<-as.numeric(hos_unicef_df$`Population(thousands)`)
+hos_unicef_df$`Population(thousands)`<-hos_unicef_df$`Population(thousands)`*(1000)
+
+```
+
+```{r}
+urlfile2="https://raw.githubusercontent.com/Nhodgkinson/607-Final-Project/main/API_SP.DYN.IMRT.IN_DS2_en_csv_v2_4701014.csv"
+
+infant_mortality_df<-read_csv(url(urlfile2))
+
+infant_mortality_df<-infant_mortality_df[,c(1,5:50)]
+
+infant_mortality_df<-gather(infant_mortality_df, "Year", "Infant Mortatlity per 1,000 Births", 2:47)
+
+infant_mortality_df$Year<-as.numeric(infant_mortality_df$Year)
+
+infant_mortality_df<-infant_mortality_df %>%
+  subset(Year > 1999 & Year < 2006)
+
+```
+
+```{r}
+
+#Increase in handwashing facilities
+increase_hw_df<-hos_unicef_df %>%
+  subset(Year > 1999 & Year < 2006)%>%
+  filter(`COUNTRY, AREA OR TERRITORY` == "Ghana"|`COUNTRY, AREA OR TERRITORY` == "Rwanda")
+
+increase_hw_df<-increase_hw_df[,c(1,2,8)]
+
+```
+
+```{r}
+#Decrease in handwashing facilities
+decrease_hw_df<-hos_unicef_df %>%
+  subset(Year > 1999 & Year < 2006)%>%
+  filter(`COUNTRY, AREA OR TERRITORY` == "Zambia"|`COUNTRY, AREA OR TERRITORY` == "Kenya")
+
+decrease_hw_df<-decrease_hw_df[,c(1,2,8)]
+
+```
+
+```{r}
+#no change in number of handwashing facilities
+same_hw_df<-hos_unicef_df %>%
+  subset(Year > 1999 & Year < 2006)%>%
+  filter(`COUNTRY, AREA OR TERRITORY` == "Myanmar"|`COUNTRY, AREA OR TERRITORY` == "Mauritania")
+
+same_hw_df<-same_hw_df[,c(1,2,8)]
+
+```
+
+```{r}
+increase_merge_df<-merge(x=increase_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRUE)
+
+same_merge_df<-merge(x=same_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRUE)
+
+decrease_merge_df<-merge(x=decrease_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRUE)
+```
+
+```{r}
+increase_merge_new<-increase_merge_df[increase_merge_df$Year.x == increase_merge_df$Year.y,]
+decrease_merge_new<-decrease_merge_df[decrease_merge_df$Year.x == decrease_merge_df$Year.y,]
+same_merge_new<-same_merge_df[same_merge_df$Year.x == same_merge_df$Year.y,]
+```
+
+```{r}
+same_merge_new<-same_merge_new[,-c(4)]
+decrease_merge_new<-decrease_merge_new[,-c(4)]
+increase_merge_new<-increase_merge_new[,-c(4)]
+```
+
