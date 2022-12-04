@@ -1,6 +1,6 @@
 ---
 title: "DATA607_Final_Project"
-author: "Wilson Ng"
+author: "Wilson Ng & Neil Hodgkinson"
 date: "2022-11-25"
 output:
   pdf_document: default
@@ -145,6 +145,8 @@ urlfile="https://raw.githubusercontent.com/Nhodgkinson/607-Final-Project/main/JM
 unicef_df_all<-read_csv(url(urlfile))
 unicef_df_all$...3 <- str_replace_all(unicef_df_all$...3 , " ", "")
 
+#Cleaning data frame from wide to long. Removing unneccasary columns and focusing in on Hospital data
+
 hos_unicef_df<-unicef_df_all[,c(1:4,20:24)]
 names(hos_unicef_df) <- hos_unicef_df[1,]
 hos_unicef_df<-hos_unicef_df[-1,]
@@ -154,6 +156,8 @@ hos_unicef_df$`Population(thousands)`<-hos_unicef_df$`Population(thousands)`*(10
 
 ```{r}
 urlfile2="https://raw.githubusercontent.com/Nhodgkinson/607-Final-Project/main/API_SP.DYN.IMRT.IN_DS2_en_csv_v2_4701014.csv"
+
+#Cleaning data frame from wide to long. Only looking at years 2000-2005
 
 infant_mortality_df<-read_csv(url(urlfile2))
 infant_mortality_df<-infant_mortality_df[,c(1,5:50)]
@@ -191,6 +195,8 @@ same_hw_df<-same_hw_df[,c(1,2,8)]
 ```
 
 ```{r}
+#Joining hospital df and mortality df
+
 increase_merge_df<-merge(x=increase_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRUE)
 same_merge_df<-merge(x=same_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRUE)
 decrease_merge_df<-merge(x=decrease_hw_df,y=infant_mortality_df,by= 1 ,all.x=TRUE)
@@ -203,6 +209,8 @@ same_merge_new<-same_merge_df[same_merge_df$Year.x == same_merge_df$Year.y,]
 ```
 
 ```{r}
+#Removing population column
+
 same_merge_new<-same_merge_new[,-c(4)]
 decrease_merge_new<-decrease_merge_new[,-c(4)]
 increase_merge_new<-increase_merge_new[,-c(4)]
