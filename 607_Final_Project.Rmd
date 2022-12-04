@@ -207,19 +207,25 @@ same_merge_new<-same_merge_new[,-c(4)]
 decrease_merge_new<-decrease_merge_new[,-c(4)]
 increase_merge_new<-increase_merge_new[,-c(4)]
 
-same_merge_new %>% rename_at("Year.x", ~"Year")
+# Renamed Year column
+same_merge_new %>% rename_at("Year.x", ~"year")
 
-decrease_merge_new <- decrease_merge_new %>% rename_at("Year.x", ~"Year") %>% mutate(increase_in_hygiene_facilities = FALSE)
+# Renamed Year column for the following df and added a new column for true or false
+decrease_merge_new <- decrease_merge_new %>% rename_at("Year.x", ~"year") %>% mutate(increase_in_hygiene_facilities = FALSE)
 
-increase_merge_new <- increase_merge_new %>% rename_at("Year.x", ~"Year") %>% mutate(increase_in_hygiene_facilities = TRUE)
+# Renamed Year column for the following df and added a new column for true or false
+increase_merge_new <- increase_merge_new %>% rename_at("Year.x", ~"year") %>% mutate(increase_in_hygiene_facilities = TRUE)
 
+# Joined rows into one table
 binded_unicef_df <- bind_rows(decrease_merge_new, increase_merge_new)
 
+# Renamed columns so there's no spaces between words.
 binded_unicef_df <- binded_unicef_df %>% rename_at("Infant Mortatlity per 1,000 Births", ~"death_rate_per_1000_births")
 
 binded_unicef_df <- binded_unicef_df %>% rename_at("COUNTRY, AREA OR TERRITORY", ~"country")
 
-binded_unicef_df$Year <- binded_unicef_df$Year %>% as.numeric()
+# converted data type for year from chr to dbl
+binded_unicef_df$year <- binded_unicef_df$year %>% as.numeric()
 
 binded_unicef_df
 ```
@@ -227,29 +233,35 @@ binded_unicef_df
 
 
 ```{r}
-ggplot(binded_unicef_df, aes(Year, death_rate_per_1000_births, color = increase_in_hygiene_facilities)) +
+ggplot(binded_unicef_df, aes(year, death_rate_per_1000_births, color = increase_in_hygiene_facilities)) +
   geom_line() +
   facet_wrap(~country)
 ```
 
 ```{r}
-
 yearly_summary <- binded_unicef_df %>%
+  group_by(year, increase_in_hygiene_facilities) %>%
+  summarise(mean_deaths = mean(death_rate_per_1000_births))
+
+mean_deaths_by_boolean <- binded_unicef_df %>%
   group_by(increase_in_hygiene_facilities) %>%
   summarise(mean_deaths = mean(death_rate_per_1000_births))
 
+mean_deaths_by_boolean
 yearly_summary
+
+ggplot(yearly_summary, aes(year, mean_deaths, color = increase_in_hygiene_facilities)) +
+  geom_line()
 ```
 
 
 ```{r}
 
-# Calculating a 95% Confidence intrerval using t.test 
+# Calculating a 95% Confidence interval using t.test 
 test_result <- t.test( death_rate_per_1000_births ~ increase_in_hygiene_facilities, data = binded_unicef_df)
 test_result
 
 ```
-
 
 
 
